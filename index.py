@@ -1,10 +1,12 @@
 import os
 import tkinter as tk
 import tkinter.ttk as ttk
+import results
 
 from tkinter import filedialog
 from tkinter.ttk import Combobox
 from tkinter import messagebox
+from results import openNewWindow
 
 # open new window
 root = tk.Tk()
@@ -46,6 +48,7 @@ def openNewWindow():
         newWindow.title("Analyze Results")
         newWindow.geometry("1300x600")
         label = tk.Label(newWindow, text = "Please wait...")
+        sizeResults_tree = ttk.Treeview(newWindow)
         label.pack()
 
     except IndexError:
