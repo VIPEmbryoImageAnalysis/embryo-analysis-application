@@ -6,7 +6,7 @@ import results
 from tkinter import filedialog
 from tkinter.ttk import Combobox
 from tkinter import messagebox
-from results import openNewWindow
+#from results import openNewWindow
 
 # open new window
 root = tk.Tk()
@@ -18,28 +18,27 @@ def uploadVideos():
     filepath = filedialog.askopenfilename()
     displayFiles.insert('', 'end', text= filepath, values=(filepath))
 
-# define event: confirm removal of file
-def confirmFileRemoval():
+# def event: confirm deletion of file
+def yesRemove():
+    try:
+        selected_item = displayFiles.selection()[0] # get selected item
+        displayFiles.delete(selected_item)
+
+    except IndexError:
+        messagebox.showerror("Error", "No selected file") # error message
+
+# define event: delete file
+def deleteFile():
     newWindow = tk.Toplevel(root)
     newWindow.title("Delete File")
     newWindow.geometry("300x200")
     ttk.Label(newWindow, text = "Are you sure you want to remove the \n\t   selected video?", font = ("Arial", 10)).place(x = 40, y = 30)     # confirmation message
     
-    yesRemoveButton = tk.Button(newWindow, width = 5, text = 'Yes') # yes button
+    yesRemoveButton = tk.Button(newWindow, width = 5, text = 'Yes', command = yesRemove) # yes button
     yesRemoveButton.place(x = 100, y = 120)
-    
-    cancelRemoveButton = tk.Button(newWindow, text = 'Cancel', command = root.destroy)  # cancel button
+
+    cancelRemoveButton = tk.Button(newWindow, text = 'Cancel', command = newWindow.destroy)  # cancel button
     cancelRemoveButton.place(x = 160, y = 120)
-
-
-# define event: remove selected file
-def removeFile(): 
-    try:
-        selected_item = displayFiles.selection()[0] # get selected item
-        displayFiles.delete(selected_item)
-    except IndexError:
-        messagebox.showerror("Error", "No selected file") # error message
-
 
 # define event: open new window
 def openNewWindow():
@@ -73,7 +72,7 @@ displayFiles.heading("#0", text = "File Path", anchor = tk.W)           # define
 displayFiles.place(x = 250, y = 180)
 
 # button: remove files
-removeButton = tk.Button(root, text = 'Delete File', command = removeFile)
+removeButton = tk.Button(root, text = 'Delete File', command = deleteFile)
 removeButton.place(x = 590, y = 420)
 
 # button: analyze results
