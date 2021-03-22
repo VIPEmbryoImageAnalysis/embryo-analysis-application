@@ -16,10 +16,13 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from keras_segmentation import pretrained
 
+import csv
+
 
 # intialize lists
 paths = []
 
+###############################################################################
 # loading the model
 model_config = {
     "input_height": 480,
@@ -33,6 +36,15 @@ latest_weights = '1790refinedweights/1790weights.h5'
 
 model = pretrained.model_from_checkpoint_path(model_config, latest_weights)
 
+###############################################################################
+# Generate empty CSV
+with open('embryo_results.csv', 'w', newline='') as csvfile:
+    fieldnames = ['Videos','Time (h)','Initial Size (um^2)','Final Size (um^2)',
+                   'Final Size Rank','Average Growth Rate','Avg Growth Rate Rank']
+    thewriter = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    thewriter.writeheader()
+
+###############################################################################
 # open new window
 root = tk.Tk()
 root.title("Embryo Analysis")
@@ -81,7 +93,7 @@ def openNewWindow():
         label.pack()
         
         # for each path containing the extracted images
-        for i in paths:
+        #for i in paths:
             
             # INSERT FRAME EXTRACTION (Make a folder for each video containing all extracted images)
                 
@@ -89,8 +101,8 @@ def openNewWindow():
                 # apply segmentation
                 # replace inp_dir with folder directory
                 # replace out_dir with new folder directory
-                model.predict_multiple(inp_dir="tester/Images",
-                                       out_dir="tester/PythonSeg", overlay_img=True)
+                #model.predict_multiple(inp_dir="tester/Images",
+                                       #out_dir="tester/PythonSeg", overlay_img=True)
             
                 # INSERT TIME EXTRACTION
                 # Take Measurements (Average growth rate, initial, final size)
@@ -101,6 +113,13 @@ def openNewWindow():
         #
         #
             
+        # for file i in paths (i from for loop in line 96)
+        # input its data into the csv file
+        # NOTE: timeArray and pixelArray need to be initialized at the start of this loop
+        #       and they contain time and pixel size
+        thewriter.writerow({'Videos':i, 'Time (h)':timeArray[-1], 'Initial Size (um^2)':pixelArray[0], 
+                'Final Size Rank':1, 'Average Growth Rate': p[1], 
+                'Avg Growth Rate Rank':1, 'Final Size (um^2)':pixelArray[-1]})
 
         data1 = {'Embryo_Size': [1920,1930,1940,1950,1960,1970,1980,1990,2000,2010],
          'Time': [9.8,12,8,7.2,6.9,7,6.5,6.2,5.5,6.3]
