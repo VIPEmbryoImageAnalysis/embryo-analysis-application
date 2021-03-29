@@ -1,4 +1,7 @@
 import os
+from distutils.dir_util import copy_tree
+from distutils.file_util import copy_file
+from shutil import rmtree
 import cv2
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -14,11 +17,12 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import PIL
 from PIL import Image
 import numpy as np
-import pytesseract
 import csv
 from keras_segmentation import pretrained
 from array import *
 
+import pytesseract
+import glob
 
 # loading the model
 model_config = {
@@ -36,6 +40,7 @@ model = pretrained.model_from_checkpoint_path(model_config, latest_weights)
 #application window
 root = tk.Tk()
 root.title("Embryo Analysis")
+root.iconbitmap(r'embryoIcon.ico')
 root.geometry("900x600")
 
 
@@ -60,9 +65,19 @@ def removeFile():
     except IndexError:
         messagebox.showerror("Error", "No selected file") # error message
 
+# define event: remove the directories created for images and segmentations    
+def removeTemporaryDirs(org_folders, org2_folders):
+    for i in org_folders:
+        rmtree(i)
+    
+    for i in org2_folders:
+        rmtree(i)
+    
+    
 #define event: Results window that contains all of the results
 def openNewWindow():
     try:
+     
         #define event: Gets the current video number used for diaplying the current graph and data
         def GetCurrentNumber():
             
@@ -179,11 +194,35 @@ def openNewWindow():
             test.plot(kind='line', legend=True, ax=ax2, color='b',marker='o', fontsize=5)
             ax2.set_xlabel('Time (h)')
             ax2.set_title('Embryo Growth Over Time')
+        
+        #define event: ask user where to save CSV
+        def saveResults():
+            dest = filedialog.askdirectory()
+            path = os.getcwd() + '/embryo_results.csv'
+            copy_file(path, dest)
+
+        #define event: ask user for folder to save images in
+        def savePics(org_folders, org2_folders, filelist):
+            dest = filedialog.askdirectory()
+            flag = 0
+            flag2 = 0
+            
+            #copy from source image folders to specified folder
+            for Path in org_folders:
+                copy_tree(Path, (dest + '/%s' % (filelist[flag]) + '_Images/'))
+                flag += 1
+            
+            #copy from source segmentation folders to specified folder
+            for Path2 in org2_folders:
+                copy_tree(Path2, (dest + '/%s' % (filelist[flag2]) + '_Segmentations/'))
+                flag2 += 1
+
 
         #creates the analyzed window
         newWindow = tk.Toplevel(root)
         newWindow.title("Analyze Results")
         newWindow.geometry("1300x600")
+        
 
         #initialized files list
         files = []
@@ -198,6 +237,7 @@ def openNewWindow():
 
         #initialized more varaible and set inital values
         org_folders = []
+        org2_folders = []
         timeArray = []
         numberoffiles = []
         filelist = []
@@ -214,6 +254,7 @@ def openNewWindow():
 
         #loop through each file in the file list
         for j in files:
+            
             #gets the filename
             filename = os.path.basename(j)
             filename = filename.replace('.avi','')
@@ -226,7 +267,11 @@ def openNewWindow():
 
             #store information about video into the list
             org_folders += [temp_path]
+            org2_folders += [temp_path2]
             filelist += [filename]
+            
+            #print(org_folders)
+            #print(org2_folders)
 
             #reads the video from the list
             video = cv2.VideoCapture(j)
@@ -249,7 +294,7 @@ def openNewWindow():
 
                 #path to tesseract.exe to get program to work
                 #change to personal path
-                pytesseract.pytesseract.tesseract_cmd = r"C:/Users/KM200/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
+                pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
                 # use tesseracts' OCR function
                 text = pytesseract.image_to_string(currentTime, lang='eng', config ='-c tessedit_char_whitelist=0123456789h')
@@ -299,7 +344,7 @@ def openNewWindow():
             #initialize i with value 1
             i = 1
 
-            #Loop through each video and count the amount of pizels from segmentation and store them
+            #Loop through each video and count the amount of pixels from segmentation and store them
             while i < count:
                 pixelcount = 0
                 image = PIL.Image.open(os.path.join(temp_path2 , "frame%d.png" % (i)))
@@ -641,13 +686,13 @@ def openNewWindow():
         frame5.place(relx = 0.65, rely = 0.75, relwidth=0.3, relheight=0.2)
 
         #creates buttons for next steps
-        yesRemoveButton1 = tk.Button(frame5, text = 'Save Images and Labels')
+        yesRemoveButton1 = tk.Button(frame5, text = 'Save Images and Labels', command = lambda: savePics(org_folders, org2_folders, filelist))
         yesRemoveButton1.place(relx=0.075, rely=0.1, relwidth=0.40, relheight=0.30)
-        yesRemoveButton2 = tk.Button(frame5, text = 'Save Results')
+        yesRemoveButton2 = tk.Button(frame5, text = 'Save Results', command = lambda: saveResults())
         yesRemoveButton2.place(relx=0.525, rely=0.1, relwidth=0.40, relheight=0.30)
-        yesRemoveButton3 = tk.Button(frame5, text = 'Load new videos', command = lambda: [newWindow.destroy(), RemoveAllVideos()])
+        yesRemoveButton3 = tk.Button(frame5, text = 'Load new videos', command = lambda: [newWindow.destroy(), RemoveAllVideos(), removeTemporaryDirs(org_folders, org2_folders)])
         yesRemoveButton3.place(relx=0.075, rely=0.6, relwidth=0.40, relheight=0.30)
-        yesRemoveButton4 = tk.Button(frame5, text = 'Close App', command = root.destroy)
+        yesRemoveButton4 = tk.Button(frame5, text = 'Close App', command = lambda: [newWindow.destroy(), root.destroy(), removeTemporaryDirs(org_folders, org2_folders)])
         yesRemoveButton4.place(relx=0.525, rely=0.6, relwidth=0.40, relheight=0.30)
 
     except IndexError:
