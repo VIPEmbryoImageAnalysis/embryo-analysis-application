@@ -748,11 +748,11 @@ def openNewWindow():
         tree3.insert("", "end", text="0", values=(CurrentVideoName,CurrentFinalSize,CurrentGR))
 
         #Button to go to the last value
-        LeftButton = tk.Button(newWindow, text = '<', font = ("Arial", 11), command=lambda:BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, newWindow, frame))
+        LeftButton = tk.Button(newWindow, text = '<', font = ("Arial", 11), command=lambda:BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame))
         LeftButton.place(relx=0.13, rely=0.783, relwidth=0.02, relheight=0.085)
 
         #Button to go to the next value
-        RightButton = tk.Button(newWindow, text = '>', font = ("Arial", 11), command=lambda:NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, newWindow, frame))
+        RightButton = tk.Button(newWindow, text = '>', font = ("Arial", 11), command=lambda:NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame))
         RightButton.place(relx=0.525, rely=0.783, relwidth=0.02, relheight=0.085)
 
         #creates new window to hold buttons
