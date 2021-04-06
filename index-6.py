@@ -769,6 +769,13 @@ def openNewWindow():
         yesRemoveButton4 = tk.Button(frame5, text = 'Close App', command = lambda: [newWindow.destroy(), root.destroy(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
         yesRemoveButton4.place(relx=0.525, rely=0.6, relwidth=0.40, relheight=0.30)
 
+        def on_closing():
+            removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)
+            RemoveAllVideos()
+            newWindow.destroy()
+        
+        newWindow.protocol("WM_DELETE_WINDOW", on_closing)
+        
     except IndexError:
         messagebox.showerror("Error", "No uploaded files")  # error message
 
