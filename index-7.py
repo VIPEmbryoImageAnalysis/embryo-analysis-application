@@ -7,8 +7,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import *
 import pandas as pd
-from tkinter import filedialog
-from tkinter.ttk import Combobox
+from tkinter import filedialog, Tk, HORIZONTAL
+from tkinter.ttk import Combobox, Progressbar
 from tkinter import messagebox
 from pandas import DataFrame
 import matplotlib.pyplot as plt
@@ -276,6 +276,13 @@ def openNewWindow():
                 copy_tree(Path2, (dest + '/%s' % (filelist[flag2]) + '_Segmentations/'))
                 flag2 += 1
 
+        #creates the loading bar window
+        loadingWindow = tk.Toplevel(root)
+        loadingWindow.title("Please Wait For Results")
+        loadingWindow.geometry("300x100")
+        progress = Progressbar(loadingWindow, orient = HORIZONTAL, length=100, mode = 'determinate')
+        progress.pack(pady = 10)
+        old = 20
 
         #creates the analyzed window
         newWindow = tk.Toplevel(root)
@@ -323,9 +330,16 @@ def openNewWindow():
 
         #debug statement
         #print(files)
+        
+        #update the progress bar
+        progress['value'] = old
+        loadingWindow.update()
 
         #loop through each file in the file list
         for j in files:
+            
+            #determine the incremental value to update progress
+            incremental = 60/len(files)
             
             #gets the filename
             filename = os.path.basename(j)
@@ -416,6 +430,12 @@ def openNewWindow():
                                 out_dir=temp_path2, overlay_img=False)
             model.predict_multiple(inp_dir=temp_path,
                                 out_dir=temp_path3, overlay_img=True)
+            
+            #update current progress after each segmentation
+            progress['value'] = incremental + old
+            loadingWindow.update()
+            old = incremental + old
+            
             #debug statement
             #print(len(timeArray))
 
@@ -685,6 +705,12 @@ def openNewWindow():
         #Sorting Ranking Data
         RankingDataSize.sort(key=lambda e: e[1])
         RankingDataGR.sort(key=lambda e: e[1])
+        
+        #last update and noti sound when complete
+        progress['value'] = 100
+        loadingWindow.update()
+        loadingWindow.bell()
+        loadingWindow.after(500, loadingWindow.destroy())
 
         #Plot of Data
         frame = tk.Frame(newWindow)
