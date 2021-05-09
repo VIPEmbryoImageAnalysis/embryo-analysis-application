@@ -44,7 +44,7 @@ try:
     base_path = sys._MEIPASS
 except Exception:
     base_path = os.path.abspath(".")
-latest_weights = os.path.join(base_path, '1790weights.h5')
+latest_weights = os.path.join(base_path, '1368weights.h5')
 model = pretrained.model_from_checkpoint_path(model_config, latest_weights)
 
 #application window
