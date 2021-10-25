@@ -33,6 +33,10 @@ import glob
 import threading
 import mttkinter
 
+# code organization - import from other scripts
+from appGUI import *
+from appOutput import *
+
 # loading the model
 model_config = {
     "input_height": 480,

@@ -33,7 +33,9 @@ import glob
 import threading
 import mttkinter
 
+# code organization - import from other scripts
 from appNetwork import *
+from appOutput import *
 
 style = Style(theme='minty')
 Style.configure('TLabel', font=('Helvetica', 12))

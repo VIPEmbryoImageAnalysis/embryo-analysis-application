@@ -27,7 +27,14 @@ import pytesseract
 import glob
 
 import threading
+
+# import styling for application theme
+from ttkbootstrap import Style
 import mttkinter
+
+# declare tkinter theme
+style = Style(theme='minty')
+Style.configure('TLabel', font=('Helvetica', 12))
 
 # loading the model
 model_config = {
@@ -311,7 +318,7 @@ def openNewWindow():
         loadingWindow = tk.Toplevel(root)
         loadingWindow.title("Please Wait For Results")
         loadingWindow.geometry("300x100")
-        progress = Progressbar(loadingWindow, orient = HORIZONTAL, length=100, mode = 'determinate')
+        progress = Progressbar(loadingWindow, orient = HORIZONTAL, length=100, mode = 'determinate', style='success.Striped.Horizontal.TProgressbar')
         progress.pack(pady = 10)
         old = 20
 
@@ -885,7 +892,7 @@ def openNewWindow():
         frame2.place(relx = 0.625, rely = 0.05, relwidth=0.325, relheight=0.3)
         label = tk.Label(frame2, text="Size Ranking")
         label.pack(expand=YES)
-        tree1 = ttk.Treeview(frame2, columns=("Video", "Rank", "Final Size (um^2)"))
+        tree1 = ttk.Treeview(frame2, columns=("Video", "Rank", "Final Size (um^2)"), style='success.Treeview')
         tree1.pack(expand=YES, fill=BOTH)
         tree1["columns"] = ("1", "2", "3")
         tree1['show'] = 'headings'
@@ -910,7 +917,7 @@ def openNewWindow():
         frame3.place(relx = 0.625, rely = 0.40, relwidth=0.325, relheight=0.3)
         label = tk.Label(frame3, text="Average Growth Rate Ranking")
         label.pack(expand=YES)
-        tree2 = ttk.Treeview(frame3, columns=("Video", "Rank", "Average Growth Rate (um^2/h)"))
+        tree2 = ttk.Treeview(frame3, columns=("Video", "Rank", "Average Growth Rate (um^2/h)"), style='success.Treeview')
         tree2.pack(expand=YES, fill=BOTH)
         tree2["columns"] = ("1", "2", "3")
         tree2['show'] = 'headings'
@@ -935,7 +942,7 @@ def openNewWindow():
         frame4.place(relx = 0.15, rely = 0.75, relwidth=0.375, relheight=0.118)
         label = tk.Label(frame4, text="Current Video")
         label.pack(expand=YES)
-        tree3 = ttk.Treeview(frame4, columns=("Video", "Final Size (um^2)", "Average Growth Rate (um^2/h)"))
+        tree3 = ttk.Treeview(frame4, columns=("Video", "Final Size (um^2)", "Average Growth Rate (um^2/h)"), style='success.Treeview')
         tree3.pack(expand=YES, fill=BOTH)
         tree3["columns"] = ("1", "2", "3")
         tree3['show'] = 'headings'
@@ -954,11 +961,11 @@ def openNewWindow():
         tree3.insert("", "end", text="0", values=(CurrentVideoName,CurrentFinalSize,CurrentGR))
 
         #Button to go to the last value
-        LeftButton = tk.Button(newWindow, text = '<', font = ("Arial", 11), command=lambda:BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame))
+        LeftButton = tk.Button(newWindow, text = '<', font = ("Helvetica", 12), style='Outline.TButton', command=lambda:BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame))
         LeftButton.place(relx=0.13, rely=0.783, relwidth=0.02, relheight=0.085)
 
         #Button to go to the next value
-        RightButton = tk.Button(newWindow, text = '>', font = ("Arial", 11), command=lambda:NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame))
+        RightButton = tk.Button(newWindow, text = '>', font = ("Helvetica", 12), style='Outline.TButton', command=lambda:NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame))
         RightButton.place(relx=0.525, rely=0.783, relwidth=0.02, relheight=0.085)
 
         #creates new window to hold buttons
@@ -966,13 +973,13 @@ def openNewWindow():
         frame5.place(relx = 0.65, rely = 0.75, relwidth=0.3, relheight=0.2)
 
         #creates buttons for next steps
-        yesRemoveButton1 = tk.Button(frame5, text = 'Save Images and Labels', command = lambda: savePics(org_folders, org3_folders, filelist))
+        yesRemoveButton1 = tk.Button(frame5, text = 'Save Images and Labels', style='Outline.TButton', command = lambda: savePics(org_folders, org3_folders, filelist))
         yesRemoveButton1.place(relx=0.075, rely=0.1, relwidth=0.40, relheight=0.30)
-        yesRemoveButton2 = tk.Button(frame5, text = 'Save Results', command = lambda: saveResults(df, df3, filelist))
+        yesRemoveButton2 = tk.Button(frame5, text = 'Save Results', style='Outline.TButton', command = lambda: saveResults(df, df3, filelist))
         yesRemoveButton2.place(relx=0.525, rely=0.1, relwidth=0.40, relheight=0.30)
-        yesRemoveButton3 = tk.Button(frame5, text = 'Load new videos', command = lambda: [newWindow.destroy(), RemoveAllVideos(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
+        yesRemoveButton3 = tk.Button(frame5, text = 'Load new videos', style='Outline.TButton', command = lambda: [newWindow.destroy(), RemoveAllVideos(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
         yesRemoveButton3.place(relx=0.075, rely=0.6, relwidth=0.40, relheight=0.30)
-        yesRemoveButton4 = tk.Button(frame5, text = 'Close App', command = lambda: [newWindow.destroy(), root.destroy(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
+        yesRemoveButton4 = tk.Button(frame5, text = 'Close App', style='Outline.TButton', command = lambda: [newWindow.destroy(), root.destroy(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
         yesRemoveButton4.place(relx=0.525, rely=0.6, relwidth=0.40, relheight=0.30)
 
         def on_closing():
@@ -987,30 +994,30 @@ def openNewWindow():
 
 
 # button: upload videos
-uploadButton = tk.Button(root, text = 'Upload Video', font = ("Arial", 11), command=uploadVideos)
+uploadButton = tk.Button(root, text = 'Upload Video', font = ("Helvetica", 12), style='Outline.TButton', command=uploadVideos)
 uploadButton.place(relx=0.5, rely=0.2, anchor='n')
 
-#display selected files  words
-filesText = ttk.Label(root, text = "Uploaded files:", font = ("Arial", 11))  # label for selected files
+# display selected files  words
+filesText = ttk.Label(root, text = "Uploaded files:")  # label for selected files
 filesText.place(relx = 0.07, rely = 0.3)
 
-#display file path
+# display file path
 frame1 = tk.Frame(root)
 frame1.place(relx = 0.2, rely = 0.3, relwidth=0.6, relheight=0.4)
-displayFiles1 = ttk.Treeview(frame1)
+displayFiles1 = ttk.Treeview(frame1, style='success.Treeview')
 displayFiles1.heading("#0", text = "File Path", anchor='w')           # define heading for file path
 displayFiles1.place(relwidth=1, relheight=1)
 
 # button: remove files
-removeButton = tk.Button(root, text = 'Delete File', font = ("Arial", 11), command=removeFile)
+removeButton = tk.Button(root, text = 'Delete File', font = ("Helvetica", 12), style='Outline.TButton', command=removeFile)
 removeButton.place(relx = 0.5, rely = 0.75, relwidth=0.15)
 
 # button: analyze results
-analyzeButton = tk.Button(root, text = 'Analyze Results', font = ("Arial", 11), command=openNewWindow)
+analyzeButton = tk.Button(root, text = 'Analyze Results', font = ("Helvetica", 12), style='Outline.TButton', command=openNewWindow)
 analyzeButton.place(relx = 0.65, rely = 0.75, relwidth=0.15)
 
 # button: close app
-closeButton = tk.Button(root, text = 'Close Application', font = ("Arial", 11), command=root.destroy)
+closeButton = tk.Button(root, text = 'Close Application', font = ("Helvetica", 12), style='Outline.TButton', command=root.destroy)
 closeButton.place(relx=0.5, rely=0.85, anchor='n')
 
 # event loop
