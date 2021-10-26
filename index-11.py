@@ -34,7 +34,7 @@ import mttkinter
 
 # declare tkinter theme
 style = Style(theme='minty')
-Style.configure('TLabel', font=('Helvetica', 12))
+style.configure('TLabel', font=('Helvetica', 12))
 
 # loading the model
 model_config = {
