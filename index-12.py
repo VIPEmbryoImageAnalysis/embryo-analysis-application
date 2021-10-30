@@ -22,16 +22,19 @@ import tensorflow
 from tensorflow import keras
 from keras_segmentation import pretrained
 from array import *
-from ttkbootstrap import Style
 
 import pytesseract
 import glob
 
 import threading
+
+# import styling for application theme
+from ttkbootstrap import Style
 import mttkinter
 
+# declare tkinter theme
 style = Style(theme='minty')
-# Style.configure('TLabel', font=('Helvetica', 12))
+#style.configure('TLabel', font=('Helvetica', 12))
 
 # loading the model
 model_config = {
@@ -52,12 +55,18 @@ latest_weights = os.path.join(base_path, '1368weights.h5')
 model = pretrained.model_from_checkpoint_path(model_config, latest_weights)
 
 #application window
-root = style.master
+#root = tk.Tk()
+root=style.master
 root.title("Embryo Analysis")
 icon = os.path.join(base_path, 'embryoIcon.ico')
 root.iconbitmap(icon)
 root.geometry("900x600")
+root['bg'] = ''
 
+#initialize variables to keep track of video name list and values for Initial Conditions
+videoTitleList=[]
+timeZeroList=[]
+embryoSizeList=[]
 
 # define event: open file explorer, select video, display selected video in table
 def uploadVideos():
@@ -68,16 +77,44 @@ def uploadVideos():
         displayFiles1.insert('', 'end', text= filepath[i], values=(filepath[i]))
         i += 1
 
+    #gets the name of the video and appends it to a list, also append 0's to
+    #timeZeroList and embryoSizeList as default values for initialConditions function
+    videoPaths = (list(filepath))
+    for i in videoPaths:
+        name = i.split("/")
+        vidName = name[len(name)-1]
+        videoTitleList.append(vidName)
+        timeZeroList.append("0")
+        embryoSizeList.append("0")
+
 #define event: removes all of the videos in the file list 
 def RemoveAllVideos():
     for child in displayFiles1.get_children():
         displayFiles1.delete(child)
+    #clears lists used in initialConditions
+    videoTitleList.clear()
+    embryoSizeList.clear()
+    timeZeroList.clear()
 
 # define event: remove selected file
 def removeFile(): 
     try:
+        #gets filepath for selected video and splices it into a list by '/'
+        item=displayFiles1.item(displayFiles1.focus())
+        videoPath=item['text'].split('/')
+
         selected_item1 = displayFiles1.selection()[0] # get selected item
         displayFiles1.delete(selected_item1)
+
+        #get video name at the end of the list and removes it from videoTitleList
+        videoPathName=videoPath[len(videoPath)-1]
+        vidIndex=videoTitleList.index(videoPathName)
+        videoTitleList.remove(videoPathName)
+        #deletes the initialConditions value for the selected video at its respective index
+        del embryoSizeList[vidIndex]
+        del timeZeroList[vidIndex]
+
+
     except IndexError:
         messagebox.showerror("Error", "No selected file") # error message
 
@@ -93,7 +130,80 @@ def removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2):
         rmtree(i)
 
     os.remove(csvfile2)
-    
+#define event: allows user to set initial conditions (Time Zero and Initial Embryo Size)
+def initialConditions():
+    #check to see if videos are uploaded
+    if len(videoTitleList)!=0:
+        newWindow = tk.Toplevel(root)
+        newWindow.title("Initial Condtions")
+        newWindow.geometry("400x300")
+        #configures window and shows video titles in window with scrollbar
+        scrollbar = Scrollbar(newWindow)
+        videoListbox = Listbox(newWindow,yscrollcommand=scrollbar.set)
+        videoListbox.pack(side=LEFT,fill=BOTH)
+        videoListbox.config(width=35)
+        scrollbar.pack(side=LEFT,fill=Y)
+        scrollbar.config(command=videoListbox.yview)
+        backButton = Button(newWindow, text='Done',command=newWindow.destroy)
+        backButton.pack(side=RIGHT)
+        
+        selectedLabel = Label(newWindow,text='')
+        selectedLabel.place(relx=.55)
+        for i in videoTitleList:
+            videoListbox.insert(END,i)
+    #When user clicks on a video and clicks "Select", it will bring up a window that allows input for initial conditions
+    def select():
+        selectedVid = videoListbox.get(ANCHOR)
+        if selectedVid:
+            vidIndex = videoTitleList.index(selectedVid)
+            selectedLabel.config(text=selectedVid)
+            popupWindow = tk.Toplevel(root)
+            popupWindow.title("Configure Data")
+            popupWindow.geometry("250x200")
+
+            #After user enters initial condtions and clicks "Done" this function will check and append data to embryoSizeList and timeZeroList at its
+            #respective index relative to the video title
+            def getInputValues():
+                def check_float(potential_float):
+                    try:
+                        float(potential_float)
+                        return True
+                    except ValueError:
+                        return False
+                        
+                if check_float(timeZeroInput.get()):
+                    timeZeroList[vidIndex]=timeZeroInput.get()
+   
+                if check_float(embryoSizeInput.get()):
+                    embryoSizeList[vidIndex]=embryoSizeInput.get()
+                print(embryoSizeList)
+                print(timeZeroList)
+
+            #display Initial Embryo Size label and entry box
+            initialEmbryoSizeText = ttk.Label(popupWindow, text = "Initial Embryo Size(um^2):", font = ("Arial", 9))
+            initialEmbryoSizeText.pack(side=TOP)
+
+            embryoSizeInput = tk.Entry(popupWindow, width=15)
+            embryoSizeInput.pack(side=TOP)
+
+            #display Time Zero Label and entry box
+            timeZeroText = ttk.Label(popupWindow, text = "Percent Threshold(%):", font = ("Arial", 9))
+            timeZeroText.pack(side=LEFT)
+
+            timeZeroInput = tk.Entry(popupWindow, width=15)
+            timeZeroInput.pack(side=RIGHT)
+
+            doneButton = tk.Button(popupWindow,text="Done",font = ("Arial", 9),command=lambda:[getInputValues(),popupWindow.destroy()])
+            doneButton.place(relx=.8,rely=.7)
+
+    try:
+        selectButton = Button(newWindow, text = 'Select', command=select)
+        selectButton.pack(pady=10,side=RIGHT)
+
+    except Exception:
+        None
+
+
 #define event: Results window that contains all of the results
 def openNewWindow():
     try:
@@ -177,19 +287,24 @@ def openNewWindow():
             figure2 = plt.Figure(figsize=(5,4), dpi=100)
             ax2 = figure2.add_subplot(111)
             ax2.set_ylabel('Embryo Size (um^2)')
-            line2 = FigureCanvasTkAgg(figure2, newWindow)
-            line2.get_tk_widget().place(relx = 0.03, rely = 0.05, relwidth=0.57, relheight=0.6)
-            
-            test = df[NextVideoNumber]
-            test = test[['Time','Embryo_Size']].groupby('Time').sum()
-            test.plot(kind='line', legend=True, ax=ax2, color='b',marker='o', fontsize=5)
-            
-            test2 = df3[NextVideoNumber]
-            test2 = test2[['Time','Growth_Rate']].groupby('Time').sum()
-            test2.plot(kind='line', legend=True, ax=ax2, color='r',marker='o', fontsize=5)
+            minValuesObj = df[NextVideoNumber].min()
+            maxValuesObj = df[NextVideoNumber].max()
+            ax2.set_xlim([minValuesObj[0], maxValuesObj[0]])
+
+            #Plot of Data
+            dataLine = df[NextVideoNumber]
+            dataLine = dataLine[['Time','Embryo_Size']].groupby('Time').sum()
+            dataLine.plot(kind='line', legend=True, ax=ax2, color='b',marker='o', fontsize=5)
+
+            grLine = df3[NextVideoNumber]
+            grLine = grLine[['Time','Growth_Rate']].groupby('Time').sum()
+            grLine.plot(kind='line', legend=True, ax=ax2, color='r',marker='o', fontsize=5)
             
             ax2.set_xlabel('Time (h)')
             ax2.set_title('Embryo Growth Over Time')
+            
+            ax2.axvline(0, color='k', linestyle='--')
+            ax2.axhline(temppixelArray[0], color='k', linestyle='--')
 
         #define event:  displays the previous video data on the screen when called
         def BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame):
@@ -221,19 +336,24 @@ def openNewWindow():
             figure2 = plt.Figure(figsize=(5,4), dpi=100)
             ax2 = figure2.add_subplot(111)
             ax2.set_ylabel('Embryo Size (um^2)')
-            line2 = FigureCanvasTkAgg(figure2, newWindow)
-            line2.get_tk_widget().place(relx = 0.03, rely = 0.05, relwidth=0.57, relheight=0.6)
-            
-            test = df[LastVideoNumber]
-            test = test[['Time','Embryo_Size']].groupby('Time').sum()
-            test.plot(kind='line', legend=True, ax=ax2, color='b',marker='o', fontsize=5)
-            
-            test2 = df3[LastVideoNumber]
-            test2 = test2[['Time','Growth_Rate']].groupby('Time').sum()
-            test2.plot(kind='line', legend=True, ax=ax2, color='r',marker='o', fontsize=5)
+            minValuesObj = df[LastVideoNumber].min()
+            maxValuesObj = df[LastVideoNumber].max()
+            ax2.set_xlim([minValuesObj[0], maxValuesObj[0]])
+
+            #Plot of Data
+            dataLine = df[LastVideoNumber]
+            dataLine = dataLine[['Time','Embryo_Size']].groupby('Time').sum()
+            dataLine.plot(kind='line', legend=True, ax=ax2, color='b',marker='o', fontsize=5)
+
+            grLine = df3[LastVideoNumber]
+            grLine = grLine[['Time','Growth_Rate']].groupby('Time').sum()
+            grLine.plot(kind='line', legend=True, ax=ax2, color='r',marker='o', fontsize=5)
             
             ax2.set_xlabel('Time (h)')
             ax2.set_title('Embryo Growth Over Time')
+            
+            ax2.axvline(0, color='k', linestyle='--')
+            ax2.axhline(temppixelArray[0], color='k', linestyle='--')
         
         #define event: ask user where to save CSV
         def saveResults(df, df3, filelist):
@@ -251,21 +371,30 @@ def openNewWindow():
                 dftemp = []
                 test = []
                 test2 = []
-                csvfile3 = dest + '/' + j + '_Data.csv'
+                csvfile3 = base_path3 + '/' + j + '_Data.csv'
                 pd.concat([df[k], df3[k]], axis=1).to_csv(csvfile3)
                 figure2 = plt.Figure(figsize=(5,4), dpi=100)
                 ax2 = figure2.add_subplot(111)
                 ax2.set_ylabel('Embryo Size (um^2)')
-                test = df[k]
-                test = test[['Time','Embryo_Size']].groupby('Time').sum()
-                test.plot(kind='line', legend=True, ax=ax2, color='b',marker='o', fontsize=5)
-                test2 = df3[k]
-                test2 = test2[['Time','Growth_Rate']].groupby('Time').sum()
-                test2.plot(kind='line', legend=True, ax=ax2, color='r',marker='o', fontsize=5)
+                minValuesObj = df[k].min()
+                maxValuesObj = df[k].max()
+                ax2.set_xlim([minValuesObj[0], maxValuesObj[0]])
+
+                #Plot of Data
+                dataLine = df[k]
+                dataLine = dataLine[['Time','Embryo_Size']].groupby('Time').sum()
+                dataLine.plot(kind='line', legend=True, ax=ax2, color='b',marker='o', fontsize=5)
+
+                grLine = df3[k]
+                grLine = grLine[['Time','Growth_Rate']].groupby('Time').sum()
+                grLine.plot(kind='line', legend=True, ax=ax2, color='r',marker='o', fontsize=5)
+                
                 ax2.set_xlabel('Time (h)')
                 ax2.set_title('Embryo Growth Over Time')
-                figname = dest + '/' + j + '_Plot.png'
-                figure2.savefig(figname)
+                
+                ax2.axvline(0, color='k', linestyle='--')
+                ax2.axhline(temppixelArray[0], color='k', linestyle='--')
+
                 k += 1
 
         #define event: ask user for folder to save images in
@@ -321,16 +450,31 @@ def openNewWindow():
         org_folders = []
         org2_folders = []
         org3_folders = []
-        timeArray = []
         numberoffiles = []
         filelist = []
-        pixelArray = []
         pixeltoreal = 0.58 * 0.58
         imsize = (480,480)
         q = 1
+        
+        tempvideocount = 0
+        initialsize =[]
+        finalsize =[]
+        finaltime = []
+        initialtime = []
+        growthsize = []
+        totaldata = []
+        totaldata1  = []
+        totaldata2 = []
+        df = []
+        df3 = []
+        df4 = []
+        #store information into threshhold and input size arrays
+        percentthreshold = timeZeroList
+        inputsize = embryoSizeList
 
+        
         try:
-            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            # PyInstaller creates a temp folder and stores path in _MEIPASS 
             base_path1 = sys._MEIPASS
         except Exception:
             base_path1 = os.path.abspath(".")
@@ -353,7 +497,10 @@ def openNewWindow():
 
         #loop through each file in the file list
         for j in files:
-            
+            timeArray = []
+            pixelArray = []
+            temptimeArray = []
+            temppixelArray = []
             #determine the incremental value to update progress
             incremental = 60/len(files)
             
@@ -403,17 +550,17 @@ def openNewWindow():
                 if len(clrs) == 1:
                     
                     #use two digit number w/ decimal
-                    currentTime = image[475:489, 456:483] 
+                    currentTime = image[475:489, 456:481] 
                     
                 else:
                     #three digit number w/ decimal
-                    currentTime = image[475:489, 449:483]
+                    currentTime = image[475:489, 449:481]
 
 
                 #sharpen image if 0.3 doesn't work try change factor to 0.4
                 currentTime = Image.fromarray(currentTime)
                 enhancer = ImageEnhance.Sharpness(currentTime)
-                factor = 0.3
+                factor = 0.3047
                 currentTime = enhancer.enhance(factor)
                 currentTime = np.asarray(currentTime)
 
@@ -448,10 +595,12 @@ def openNewWindow():
                 #resizes image, save new file, and reads in next video
                 image = cv2.resize(image, imsize)
                 cv2.imwrite(os.path.join(temp_path , "frame%d.png" % (count)), image)
-                success,image = video.read()
+                
 
                 #increase count by 1
                 count += 1
+
+                success,image = video.read()
             
 
             #debug statement
@@ -484,7 +633,9 @@ def openNewWindow():
 
             #initialize i with value 1
             i = 1
-
+            startingcountingsize = 0
+            tempframenumber = []
+            ok = 0
             #Loop through each video and count the amount of pixels from segmentation and store them
             while i < count:
                 pixelcount = 0
@@ -493,66 +644,114 @@ def openNewWindow():
                     for y in range(image.width):
                         if image.getpixel((x, y)) == (10, 34, 46):
                             pixelcount += 1
-                pixelArray.append(pixelcount*pixeltoreal)
+                if i == 1:
+                    #Get the scaling factor from the initial input size
+                    if float(inputsize[tempvideocount]) == 0:
+                        scalingfactor = 1
+                    else:
+                        scalingfactor = float(inputsize[tempvideocount])/(pixelcount*pixeltoreal)  
+
+                if i == 1:
+                    #debug statement
+                    #print(tempvideocount)
+                    #print(float(percentthreshold[tempvideocount]))
+
+                    #Gets the value for the threshold
+                    multiplicationthreshold = (float(percentthreshold[tempvideocount]) + 100)/100
+                    startingcountingsize = pixelcount * pixeltoreal * scalingfactor * multiplicationthreshold
+                #Checks to see if the size passes the threshold
+                if (pixelcount * pixeltoreal * scalingfactor) >= startingcountingsize:
+                    ok = 1
+                #If the size passes the threshold
+                if ok == 1:
+                    tempframenumber += [i]
+                    #pixelArray.append(pixelcount*pixeltoreal)
+                    temppixelArray.append(pixelcount*pixeltoreal*scalingfactor)
+                
+                #Store the pixel size to an array
+                pixelArray.append(pixelcount*pixeltoreal*scalingfactor)
                 i += 1
 
             #debug statement
             #print(pixelArray)
+            tempdeletenumber = tempframenumber[0] - 1
+            temptimeArray = [None] * len(timeArray)
+            #print(temptimeArray)
+            for i in range(0, len(timeArray)):    
+                temptimeArray[i] = timeArray[i]
+                
+            #print(temptimeArray)
+            del temptimeArray[0:tempdeletenumber]
+            #print(temptimeArray)
 
+            ok = 1
+            i = 1
             #initialize count back to 1
             count = 1
-        
-        #debug statement
-        #print(numberoffiles)
+            size = []
+            time = []
+            i = 0
+            k = 0
+            p = []
+            #debug statement
+            #print(numberoffiles)
 
-        #initialize new values
-        size = []
-        time = []
-        totaldata = []
-        totaldata1  = []
-        df = []
-        df3 = []
-        i = 0
-        k = 0
-        initialsize =[]
-        finalsize =[]
-        finaltime = []
-        initialtime = []
-        p = []
-        growthsize =[]
-        #Run through each list to get the initial size, final size, and final time
-        for x in range(len(numberoffiles)):
-            while k < numberoffiles[x]:
+            #Run through each list to get the initial size, final size, and final time
+        
+            while k < numberoffiles[tempvideocount]:
+                #If it is the first frame
                 if k == 0:
                     initialsize.append(pixelArray[i])
                     initialtime.append(timeArray[i])
-                if k == (numberoffiles[x] - 1):
-                    #print(k)
+                #If it is the last frame
+                if k == (numberoffiles[tempvideocount]-1):
                     finalsize.append(pixelArray[i])
-                    finaltime.append(timeArray[i]-initialtime[x])
+                    finaltime.append(timeArray[i]-initialtime[tempvideocount])
                 #Get all of the size and times into an array
-                size.append(pixelArray[i])
-                time.append(timeArray[i])
+                #size.append(pixelArray[i])
+                #time.append(timeArray[i])
+                #print(pixelArray[i])
                 i += 1
                 k += 1
                 #print(i)
+                #print(time)
+                #print(size)
+                #Debug Statement
+                #print(time)
+                #print(time[0])
+
+            stoptime = 0
+
+            #Check to see if time passes 10h after the threshold point
+            timeholder = temptimeArray[0]
+            for t in range(len(temptimeArray)):
+                temptimeArray[t] = round(temptimeArray[t] - timeholder, 3)
+                if temptimeArray[t] >= 10:
+                    if stoptime == 0:
+                        stoptime = t
+
+            #delete the info not within the 10 h from the arrays
+            if stoptime != 0:
+                del temptimeArray[stoptime+1:-1]
+                del temppixelArray[stoptime+1:-1]
+                del temptimeArray[-1]
+                del temppixelArray[-1]
             
-            #Debug Statement
-            #print(time)
-            #print(time[0])
-            
-            timeholder = time[0]
-            for t in range(len(time)):
-                time[t] = round(time[t] - timeholder, 3)
+            modtimeArray = timeArray
+            #get modified time array for plot
+            for t in range(len(modtimeArray)):
+                modtimeArray[t] = round(modtimeArray[t] - timeholder, 3)
+
 
             #gets the average growth size
-            z = np.polyfit(time, size, 1)
+            z = np.polyfit(temptimeArray, temppixelArray, 1)
             p = np.poly1d(z)
 
             #debug statement
             #print(p)
 
             #add growth size to the list
+            #print(p[1])
             growthsize.append(p[1])
 
             #debug statements
@@ -563,20 +762,30 @@ def openNewWindow():
             #print(finalsize)
 
             #Get plotting info
-            data1 = {'Time': time, 'Embryo_Size': size}
-            data0 = {'Time': time, 'Growth_Rate': p(time)}
-            
+            data2 = {'Time': modtimeArray, 'Embryo_Size': pixelArray}
+            data1 = {'Time': temptimeArray, 'Embryo_Size': temppixelArray}
+            data0 = {'Time': temptimeArray, 'Growth_Rate': p(temptimeArray)}
+
             totaldata.append(data1)
             totaldata1.append(data0)
-            df1 = DataFrame(totaldata[x],columns=['Time','Embryo_Size'])
-            df2 = DataFrame(totaldata1[x],columns=['Time','Growth_Rate'])
-            df.append(df1)
+            totaldata2.append(data2)
+
+            #print(totaldata)
+            #print(totaldata1)
+
+            df1 = DataFrame(totaldata[tempvideocount],columns=['Time','Embryo_Size'])
+            df2 = DataFrame(totaldata1[tempvideocount],columns=['Time','Growth_Rate'])
+            df4 = DataFrame(totaldata2[tempvideocount],columns=['Time','Embryo_Size'])
+            df.append(df4)
             df3.append(df2)
+            
 
             #clears the size and time arrays
-            size.clear()
-            time.clear()
+            #size.clear()
+            #time.clear()
             k = 0
+
+            tempvideocount += 1
         #sets i to 0
         i = 0
 
@@ -757,22 +966,30 @@ def openNewWindow():
 
         #Plot of Data
         frame = tk.Frame(newWindow)
+        
         figure2 = plt.Figure(figsize=(5,4), dpi=100)
         ax2 = figure2.add_subplot(111)
         ax2.set_ylabel('Embryo Size (um^2)')
         line2 = FigureCanvasTkAgg(figure2, newWindow)
         line2.get_tk_widget().place(relx = 0.03, rely = 0.05, relwidth=0.57, relheight=0.6)
-        
-        test = df[0]
-        test = test[['Time','Embryo_Size']].groupby('Time').sum()
-        test.plot(kind='line', legend=True, ax=ax2, color='b',marker='o', fontsize=5)
-        
-        test2 = df3[0]
-        test2 = test2[['Time','Growth_Rate']].groupby('Time').sum()
-        test2.plot(kind='line', legend=True, ax=ax2, color='r',marker='o', fontsize=5)
+        minValuesObj = df[0].min()
+        maxValuesObj = df[0].max()
+        ax2.set_xlim([minValuesObj[0], maxValuesObj[0]])
 
+        #Plot of Data
+        dataLine = df[0]
+        dataLine = dataLine[['Time','Embryo_Size']].groupby('Time').sum()
+        dataLine.plot(kind='line', legend=True, ax=ax2, color='b',marker='o', fontsize=5)
+
+        grLine = df3[0]
+        grLine = grLine[['Time','Growth_Rate']].groupby('Time').sum()
+        grLine.plot(kind='line', legend=True, ax=ax2, color='r',marker='o', fontsize=5)
+        
         ax2.set_xlabel('Time (h)')
         ax2.set_title('Embryo Growth Over Time')
+        
+        ax2.axvline(0, color='k', linestyle='--')
+        ax2.axhline(temppixelArray[0], color='k', linestyle='--')
 
         #Tables for Ranking Data
         frame2 = tk.Frame(newWindow)
@@ -879,32 +1096,39 @@ def openNewWindow():
     except IndexError:
         messagebox.showerror("Error", "No uploaded files")  # error message
 
+#create initialConditions Button
+initialConditionsButton = tk.Button(root, text = 'Edit Initial Conditions',font = ("Helvetica", 12), command=initialConditions)
+initialConditionsButton.place(relx=.8,rely=.2)
 
+#style='Outline.TButton'
 # button: upload videos
-uploadButton = tk.Button(root, text = 'Upload Video', font = ("Helvetica", 12), style='Outline.TButton', command=uploadVideos)
+uploadButton = tk.Button(root, text = 'Upload Video', font = ("Helvetica", 12), command=uploadVideos)
 uploadButton.place(relx=0.5, rely=0.2, anchor='n')
 
-#display selected files  words
-filesText = ttk.Label(root, text = "Uploaded files:")  # label for selected files
+# display selected files  words
+filesText = ttk.Label(root, text = "Uploaded files:", font = ("Helvetica", 12))  # label for selected files
 filesText.place(relx = 0.07, rely = 0.3)
 
-#display file path
+# display file path
 frame1 = tk.Frame(root)
 frame1.place(relx = 0.2, rely = 0.3, relwidth=0.6, relheight=0.4)
 displayFiles1 = ttk.Treeview(frame1, style='success.Treeview')
 displayFiles1.heading("#0", text = "File Path", anchor='w')           # define heading for file path
 displayFiles1.place(relwidth=1, relheight=1)
 
+#style='Outline.TButton'
 # button: remove files
-removeButton = tk.Button(root, text = 'Delete File', font = ("Helvetica", 12), style='Outline.TButton', command=removeFile)
+removeButton = tk.Button(root, text = 'Delete File', font = ("Helvetica", 12), command=removeFile)
 removeButton.place(relx = 0.5, rely = 0.75, relwidth=0.15)
 
+#style='Outline.TButton'
 # button: analyze results
-analyzeButton = tk.Button(root, text = 'Analyze Results', font = ("Helvetica", 12), style='Outline.TButton', command=openNewWindow)
+analyzeButton = tk.Button(root, text = 'Analyze Results', font = ("Helvetica", 12), command=openNewWindow)
 analyzeButton.place(relx = 0.65, rely = 0.75, relwidth=0.15)
 
+#style='Outline.TButton'
 # button: close app
-closeButton = tk.Button(root, text = 'Close Application', font = ("Helvetica", 12), style='Outline.TButton', command=root.destroy)
+closeButton = tk.Button(root, text = 'Close Application', font = ("Helvetica", 12), command=root.destroy)
 closeButton.place(relx=0.5, rely=0.85, anchor='n')
 
 # event loop
