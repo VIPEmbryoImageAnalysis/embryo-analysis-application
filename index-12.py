@@ -33,7 +33,7 @@ from ttkbootstrap import Style
 import mttkinter
 
 # declare tkinter theme
-style = Style(theme='minty')
+style = Style(theme='flatly')
 #style.configure('TLabel', font=('Helvetica', 12))
 
 # loading the model
