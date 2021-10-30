@@ -1,6 +1,9 @@
 *.dll
 *.exe
 *.html
+*.csv
+
 doc/
 tessdata/
+
 1368weights.h5

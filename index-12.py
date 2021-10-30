@@ -129,13 +129,16 @@ def removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2):
         rmtree(i)
 
     os.remove(csvfile2)
+
 #define event: allows user to set initial conditions (Time Zero and Initial Embryo Size)
 def initialConditions():
+
     #check to see if videos are uploaded
     if len(videoTitleList)!=0:
         newWindow = tk.Toplevel(root)
-        newWindow.title("Initial Condtions")
-        newWindow.geometry("400x300")
+        newWindow.title("Edit Initial Conditions")
+        newWindow.geometry("500x200")
+
         #configures window and shows video titles in window with scrollbar
         scrollbar = Scrollbar(newWindow)
         videoListbox = Listbox(newWindow,yscrollcommand=scrollbar.set)
@@ -143,13 +146,16 @@ def initialConditions():
         videoListbox.config(width=35)
         scrollbar.pack(side=LEFT,fill=Y)
         scrollbar.config(command=videoListbox.yview)
-        backButton = Button(newWindow, text='Done',command=newWindow.destroy)
-        backButton.pack(side=RIGHT)
+
+        backButton = Button(newWindow, text='Done', font = ("Helvetica", 11),command=newWindow.destroy)
+        backButton.place(relx=0.87, rely=0.8)
+        backButton['bg'] = '#3FA8B5'
         
         selectedLabel = Label(newWindow,text='')
         selectedLabel.place(relx=.55)
         for i in videoTitleList:
             videoListbox.insert(END,i)
+
     #When user clicks on a video and clicks "Select", it will bring up a window that allows input for initial conditions
     def select():
         selectedVid = videoListbox.get(ANCHOR)
@@ -158,7 +164,7 @@ def initialConditions():
             selectedLabel.config(text=selectedVid)
             popupWindow = tk.Toplevel(root)
             popupWindow.title("Configure Data")
-            popupWindow.geometry("250x200")
+            popupWindow.geometry("450x200")
 
             #After user enters initial condtions and clicks "Done" this function will check and append data to embryoSizeList and timeZeroList at its
             #respective index relative to the video title
@@ -179,25 +185,27 @@ def initialConditions():
                 print(timeZeroList)
 
             #display Initial Embryo Size label and entry box
-            initialEmbryoSizeText = ttk.Label(popupWindow, text = "Initial Embryo Size(um^2):", font = ("Arial", 9))
-            initialEmbryoSizeText.pack(side=TOP)
+            initialEmbryoSizeText = ttk.Label(popupWindow, text = "Initial Embryo Size (um^2):", font = ("Helvetica", 11))
+            initialEmbryoSizeText.place(relx=0.1, rely=0.2)
 
             embryoSizeInput = tk.Entry(popupWindow, width=15)
-            embryoSizeInput.pack(side=TOP)
+            embryoSizeInput.place(relx=0.5, rely=0.2)
 
             #display Time Zero Label and entry box
-            timeZeroText = ttk.Label(popupWindow, text = "Percent Threshold(%):", font = ("Arial", 9))
-            timeZeroText.pack(side=LEFT)
+            timeZeroText = ttk.Label(popupWindow, text = "Percent Threshold (%):", font = ("Helvetica", 11))
+            timeZeroText.place(relx=0.1, rely=0.4)
 
             timeZeroInput = tk.Entry(popupWindow, width=15)
-            timeZeroInput.pack(side=RIGHT)
+            timeZeroInput.place(relx=0.5, rely=0.4)
 
-            doneButton = tk.Button(popupWindow,text="Done",font = ("Arial", 9),command=lambda:[getInputValues(),popupWindow.destroy()])
-            doneButton.place(relx=.8,rely=.7)
+            doneButton = tk.Button(popupWindow,text="Done", font = ("Helvetica", 11), width=8, command=lambda:[getInputValues(),popupWindow.destroy()])
+            doneButton.place(relx=.75,rely=.7)
+            doneButton['bg'] = '#3FA8B5'
 
     try:
-        selectButton = Button(newWindow, text = 'Select', command=select)
-        selectButton.pack(pady=10,side=RIGHT)
+        selectButton = Button(newWindow, text = 'Select', font = ("Helvetica", 11), command=select)
+        selectButton.place(relx=0.75, rely=0.8)
+        selectButton['bg'] = '#3FA8B5'
 
     except Exception:
         None
