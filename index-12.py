@@ -33,7 +33,7 @@ from ttkbootstrap import Style
 import mttkinter
 
 # declare tkinter theme
-style = Style(theme='flatly')
+style = Style(theme='litera')
 #style.configure('TLabel', font=('Helvetica', 12))
 
 # loading the model
@@ -61,7 +61,6 @@ root.title("Embryo Analysis")
 icon = os.path.join(base_path, 'embryoIcon.ico')
 root.iconbitmap(icon)
 root.geometry("900x600")
-root['bg'] = ''
 
 #initialize variables to keep track of video name list and values for Initial Conditions
 videoTitleList=[]
@@ -425,7 +424,7 @@ def openNewWindow():
         loadingWindow = tk.Toplevel(root)
         loadingWindow.title("Please Wait For Results")
         loadingWindow.geometry("300x100")
-        progress = Progressbar(loadingWindow, orient = HORIZONTAL, length=100, mode = 'determinate', style='success.Striped.Horizontal.TProgressbar')
+        progress = Progressbar(loadingWindow, orient = HORIZONTAL, length=100, mode = 'determinate', style='primary.Striped.Horizontal.TProgressbar')
         progress.pack(pady = 10)
         old = 20
 
@@ -996,7 +995,7 @@ def openNewWindow():
         frame2.place(relx = 0.625, rely = 0.05, relwidth=0.325, relheight=0.3)
         label = tk.Label(frame2, text="Size Ranking")
         label.pack(expand=YES)
-        tree1 = ttk.Treeview(frame2, columns=("Video", "Rank", "Final Size (um^2)"), style='success.Treeview')
+        tree1 = ttk.Treeview(frame2, columns=("Video", "Rank", "Final Size (um^2)"), style='secondary.Treeview')
         tree1.pack(expand=YES, fill=BOTH)
         tree1["columns"] = ("1", "2", "3")
         tree1['show'] = 'headings'
@@ -1021,7 +1020,7 @@ def openNewWindow():
         frame3.place(relx = 0.625, rely = 0.40, relwidth=0.325, relheight=0.3)
         label = tk.Label(frame3, text="Average Growth Rate Ranking")
         label.pack(expand=YES)
-        tree2 = ttk.Treeview(frame3, columns=("Video", "Rank", "Average Growth Rate (um^2/h)"), style='success.Treeview')
+        tree2 = ttk.Treeview(frame3, columns=("Video", "Rank", "Average Growth Rate (um^2/h)"), style='secondary.Treeview')
         tree2.pack(expand=YES, fill=BOTH)
         tree2["columns"] = ("1", "2", "3")
         tree2['show'] = 'headings'
@@ -1046,7 +1045,7 @@ def openNewWindow():
         frame4.place(relx = 0.15, rely = 0.75, relwidth=0.375, relheight=0.118)
         label = tk.Label(frame4, text="Current Video")
         label.pack(expand=YES)
-        tree3 = ttk.Treeview(frame4, columns=("Video", "Final Size (um^2)", "Average Growth Rate (um^2/h)"), style='success.Treeview')
+        tree3 = ttk.Treeview(frame4, columns=("Video", "Final Size (um^2)", "Average Growth Rate (um^2/h)"), style='secondary.Treeview')
         tree3.pack(expand=YES, fill=BOTH)
         tree3["columns"] = ("1", "2", "3")
         tree3['show'] = 'headings'
@@ -1097,38 +1096,38 @@ def openNewWindow():
         messagebox.showerror("Error", "No uploaded files")  # error message
 
 #create initialConditions Button
-initialConditionsButton = tk.Button(root, text = 'Edit Initial Conditions',font = ("Helvetica", 12), command=initialConditions)
-initialConditionsButton.place(relx=.8,rely=.2)
+initialConditionsButton = ttk.Button(root, text = 'Edit Initial Conditions', style='info.Outline.TButton', command=initialConditions)
+initialConditionsButton.place(relx=.635,rely=.2)
 
 #style='Outline.TButton'
 # button: upload videos
-uploadButton = tk.Button(root, text = 'Upload Video', font = ("Helvetica", 12), command=uploadVideos)
-uploadButton.place(relx=0.5, rely=0.2, anchor='n')
+uploadButton = ttk.Button(root, text = 'Upload Video', style='info.TButton', command=uploadVideos)
+uploadButton.place(relx=0.26, rely=0.2, anchor='n')
 
 # display selected files  words
-filesText = ttk.Label(root, text = "Uploaded files:", font = ("Helvetica", 12))  # label for selected files
+filesText = ttk.Label(root, text = "Uploaded files:", font = ("Helvetica", 11))  # label for selected files
 filesText.place(relx = 0.07, rely = 0.3)
 
 # display file path
 frame1 = tk.Frame(root)
 frame1.place(relx = 0.2, rely = 0.3, relwidth=0.6, relheight=0.4)
-displayFiles1 = ttk.Treeview(frame1, style='success.Treeview')
+displayFiles1 = ttk.Treeview(frame1, style='info.Treeview')
 displayFiles1.heading("#0", text = "File Path", anchor='w')           # define heading for file path
 displayFiles1.place(relwidth=1, relheight=1)
 
 #style='Outline.TButton'
 # button: remove files
-removeButton = tk.Button(root, text = 'Delete File', font = ("Helvetica", 12), command=removeFile)
-removeButton.place(relx = 0.5, rely = 0.75, relwidth=0.15)
+removeButton = ttk.Button(root, text = 'Delete File', style='secondary.Outline.TButton', command=removeFile)
+removeButton.place(relx = 0.48, rely = 0.75, relwidth=0.15)
 
 #style='Outline.TButton'
 # button: analyze results
-analyzeButton = tk.Button(root, text = 'Analyze Results', font = ("Helvetica", 12), command=openNewWindow)
+analyzeButton = ttk.Button(root, text = 'Analyze Results', style='info.TButton',  command=openNewWindow)
 analyzeButton.place(relx = 0.65, rely = 0.75, relwidth=0.15)
 
 #style='Outline.TButton'
 # button: close app
-closeButton = tk.Button(root, text = 'Close Application', font = ("Helvetica", 12), command=root.destroy)
+closeButton = ttk.Button(root, text = 'Close Application', style='info.TButton',  command=root.destroy)
 closeButton.place(relx=0.5, rely=0.85, anchor='n')
 
 # event loop
