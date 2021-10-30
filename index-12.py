@@ -1099,7 +1099,6 @@ def openNewWindow():
 initialConditionsButton = ttk.Button(root, text = 'Edit Initial Conditions', style='info.Outline.TButton', command=initialConditions)
 initialConditionsButton.place(relx=.635,rely=.2)
 
-#style='Outline.TButton'
 # button: upload videos
 uploadButton = ttk.Button(root, text = 'Upload Video', style='info.TButton', command=uploadVideos)
 uploadButton.place(relx=0.26, rely=0.2, anchor='n')
@@ -1115,17 +1114,14 @@ displayFiles1 = ttk.Treeview(frame1, style='info.Treeview')
 displayFiles1.heading("#0", text = "File Path", anchor='w')           # define heading for file path
 displayFiles1.place(relwidth=1, relheight=1)
 
-#style='Outline.TButton'
 # button: remove files
 removeButton = ttk.Button(root, text = 'Delete File', style='secondary.Outline.TButton', command=removeFile)
 removeButton.place(relx = 0.48, rely = 0.75, relwidth=0.15)
 
-#style='Outline.TButton'
 # button: analyze results
 analyzeButton = ttk.Button(root, text = 'Analyze Results', style='info.TButton',  command=openNewWindow)
 analyzeButton.place(relx = 0.65, rely = 0.75, relwidth=0.15)
 
-#style='Outline.TButton'
 # button: close app
 closeButton = ttk.Button(root, text = 'Close Application', style='info.TButton',  command=root.destroy)
 closeButton.place(relx=0.5, rely=0.85, anchor='n')
