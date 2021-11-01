@@ -181,8 +181,6 @@ def initialConditions():
    
                 if check_float(embryoSizeInput.get()):
                     embryoSizeList[vidIndex]=embryoSizeInput.get()
-                print(embryoSizeList)
-                print(timeZeroList)
 
             #display Initial Embryo Size label and entry box
             initialEmbryoSizeText = ttk.Label(popupWindow, text = "Initial Embryo Size (um^2):", font = ("Helvetica", 11))
@@ -265,7 +263,7 @@ def openNewWindow():
             return videonumber1
 
         #define event: displays the next video data on the screen when called
-        def NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame):
+        def NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2):
             #Calls function to get current videos number
             CurrentVideoNumber = GetCurrentNumber()
 
@@ -311,10 +309,13 @@ def openNewWindow():
             ax2.set_title('Embryo Growth Over Time')
             
             ax2.axvline(0, color='k', linestyle='--')
-            ax2.axhline(temppixelArray[0], color='k', linestyle='--')
+            ax2.axhline(tempPixelArray2[NextVideoNumber], color='k', linestyle='--')
+
+            line2 = FigureCanvasTkAgg(figure2, newWindow)
+            line2.get_tk_widget().place(relx = 0.03, rely = 0.05, relwidth=0.57, relheight=0.6)
 
         #define event:  displays the previous video data on the screen when called
-        def BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame):
+        def BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2):
             #Calls function to get current videos number
             CurrentVideoNumber = GetCurrentNumber()
 
@@ -360,10 +361,13 @@ def openNewWindow():
             ax2.set_title('Embryo Growth Over Time')
             
             ax2.axvline(0, color='k', linestyle='--')
-            ax2.axhline(temppixelArray[0], color='k', linestyle='--')
+            ax2.axhline(tempPixelArray2[LastVideoNumber], color='k', linestyle='--')
+
+            line2 = FigureCanvasTkAgg(figure2, newWindow)
+            line2.get_tk_widget().place(relx = 0.03, rely = 0.05, relwidth=0.57, relheight=0.6)
         
         #define event: ask user where to save CSV
-        def saveResults(df, df3, filelist):
+        def saveResults(df, df3, filelist, tempPixelArray2):
             dest = filedialog.askdirectory()
             #print(dest)
             try:
@@ -400,7 +404,7 @@ def openNewWindow():
                 ax2.set_title('Embryo Growth Over Time')
                 
                 ax2.axvline(0, color='k', linestyle='--')
-                ax2.axhline(temppixelArray[0], color='k', linestyle='--')
+                ax2.axhline(tempPixelArray2[k], color='k', linestyle='--')
 
                 k += 1
 
@@ -432,7 +436,8 @@ def openNewWindow():
         loadingWindow = tk.Toplevel(root)
         loadingWindow.title("Please Wait For Results")
         loadingWindow.geometry("300x100")
-        progress = Progressbar(loadingWindow, orient = HORIZONTAL, length=100, mode = 'determinate', style='primary.Striped.Horizontal.TProgressbar')
+        #style='primary.Striped.Horizontal.TProgressbar'
+        progress = Progressbar(loadingWindow, orient = HORIZONTAL, length=100, mode = 'determinate')
         progress.pack(pady = 10)
         old = 20
 
@@ -475,6 +480,7 @@ def openNewWindow():
         df = []
         df3 = []
         df4 = []
+        tempPixelArray2 = []
         #store information into threshhold and input size arrays
         percentthreshold = timeZeroList
         inputsize = embryoSizeList
@@ -753,6 +759,7 @@ def openNewWindow():
             #gets the average growth size
             z = np.polyfit(temptimeArray, temppixelArray, 1)
             p = np.poly1d(z)
+            tempPixelArray2.append(temppixelArray[0])
 
             #debug statement
             #print(p)
@@ -996,14 +1003,15 @@ def openNewWindow():
         ax2.set_title('Embryo Growth Over Time')
         
         ax2.axvline(0, color='k', linestyle='--')
-        ax2.axhline(temppixelArray[0], color='k', linestyle='--')
+        ax2.axhline(tempPixelArray2[0], color='k', linestyle='--')
 
         #Tables for Ranking Data
         frame2 = tk.Frame(newWindow)
         frame2.place(relx = 0.625, rely = 0.05, relwidth=0.325, relheight=0.3)
         label = tk.Label(frame2, text="Size Ranking")
         label.pack(expand=YES)
-        tree1 = ttk.Treeview(frame2, columns=("Video", "Rank", "Final Size (um^2)"), style='secondary.Treeview')
+        #style='secondary.Treeview'
+        tree1 = ttk.Treeview(frame2, columns=("Video", "Rank", "Final Size (um^2)"))
         tree1.pack(expand=YES, fill=BOTH)
         tree1["columns"] = ("1", "2", "3")
         tree1['show'] = 'headings'
@@ -1028,7 +1036,8 @@ def openNewWindow():
         frame3.place(relx = 0.625, rely = 0.40, relwidth=0.325, relheight=0.3)
         label = tk.Label(frame3, text="Average Growth Rate Ranking")
         label.pack(expand=YES)
-        tree2 = ttk.Treeview(frame3, columns=("Video", "Rank", "Average Growth Rate (um^2/h)"), style='secondary.Treeview')
+        #style='secondary.Treeview'
+        tree2 = ttk.Treeview(frame3, columns=("Video", "Rank", "Average Growth Rate (um^2/h)"))
         tree2.pack(expand=YES, fill=BOTH)
         tree2["columns"] = ("1", "2", "3")
         tree2['show'] = 'headings'
@@ -1053,7 +1062,8 @@ def openNewWindow():
         frame4.place(relx = 0.15, rely = 0.75, relwidth=0.375, relheight=0.118)
         label = tk.Label(frame4, text="Current Video")
         label.pack(expand=YES)
-        tree3 = ttk.Treeview(frame4, columns=("Video", "Final Size (um^2)", "Average Growth Rate (um^2/h)"), style='secondary.Treeview')
+        #style='secondary.Treeview'
+        tree3 = ttk.Treeview(frame4, columns=("Video", "Final Size (um^2)", "Average Growth Rate (um^2/h)"))
         tree3.pack(expand=YES, fill=BOTH)
         tree3["columns"] = ("1", "2", "3")
         tree3['show'] = 'headings'
@@ -1072,11 +1082,13 @@ def openNewWindow():
         tree3.insert("", "end", text="0", values=(CurrentVideoName,CurrentFinalSize,CurrentGR))
 
         #Button to go to the last value
-        LeftButton = tk.Button(newWindow, text = '<', font = ("Helvetica", 12), style='Outline.TButton', command=lambda:BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame))
+        #style='Outline.TButton'
+        LeftButton = tk.Button(newWindow, text = '<', font = ("Helvetica", 12), command=lambda:BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2))
         LeftButton.place(relx=0.13, rely=0.783, relwidth=0.02, relheight=0.085)
 
         #Button to go to the next value
-        RightButton = tk.Button(newWindow, text = '>', font = ("Helvetica", 12), style='Outline.TButton', command=lambda:NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame))
+        #style='Outline.TButton'
+        RightButton = tk.Button(newWindow, text = '>', font = ("Helvetica", 12), command=lambda:NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2))
         RightButton.place(relx=0.525, rely=0.783, relwidth=0.02, relheight=0.085)
 
         #creates new window to hold buttons
@@ -1084,13 +1096,17 @@ def openNewWindow():
         frame5.place(relx = 0.65, rely = 0.75, relwidth=0.3, relheight=0.2)
 
         #creates buttons for next steps
-        yesRemoveButton1 = tk.Button(frame5, text = 'Save Images and Labels', style='Outline.TButton', command = lambda: savePics(org_folders, org3_folders, filelist))
+        #style='Outline.TButton'
+        yesRemoveButton1 = tk.Button(frame5, text = 'Save Images and Labels', command = lambda: savePics(org_folders, org3_folders, filelist))
         yesRemoveButton1.place(relx=0.075, rely=0.1, relwidth=0.40, relheight=0.30)
-        yesRemoveButton2 = tk.Button(frame5, text = 'Save Results', style='Outline.TButton', command = lambda: saveResults(df, df3, filelist))
+        #style='Outline.TButton'
+        yesRemoveButton2 = tk.Button(frame5, text = 'Save Results', command = lambda: saveResults(df, df3, filelist, tempPixelArray2))
         yesRemoveButton2.place(relx=0.525, rely=0.1, relwidth=0.40, relheight=0.30)
-        yesRemoveButton3 = tk.Button(frame5, text = 'Load new videos', style='Outline.TButton', command = lambda: [newWindow.destroy(), RemoveAllVideos(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
+        #style='Outline.TButton'
+        yesRemoveButton3 = tk.Button(frame5, text = 'Load new videos', command = lambda: [newWindow.destroy(), RemoveAllVideos(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
         yesRemoveButton3.place(relx=0.075, rely=0.6, relwidth=0.40, relheight=0.30)
-        yesRemoveButton4 = tk.Button(frame5, text = 'Close App', style='Outline.TButton', command = lambda: [newWindow.destroy(), root.destroy(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
+        #style='Outline.TButton'
+        yesRemoveButton4 = tk.Button(frame5, text = 'Close App', command = lambda: [newWindow.destroy(), root.destroy(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
         yesRemoveButton4.place(relx=0.525, rely=0.6, relwidth=0.40, relheight=0.30)
 
         def on_closing():
