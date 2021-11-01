@@ -1083,12 +1083,12 @@ def openNewWindow():
 
         #Button to go to the last value
         #style='Outline.TButton'
-        LeftButton = ttk.Button(newWindow, text = '<', style='info.TButton', command=lambda:BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2))
+        LeftButton = ttk.Button(newWindow, text = '<', style='secondary.TButton', command=lambda:BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2))
         LeftButton.place(relx=0.13, rely=0.783, relwidth=0.02, relheight=0.085)
 
         #Button to go to the next value
         #style='Outline.TButton'
-        RightButton = ttk.Button(newWindow, text = '>', style='info.TButton', command=lambda:NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2))
+        RightButton = ttk.Button(newWindow, text = '>', style='secondary.TButton', command=lambda:NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2))
         RightButton.place(relx=0.525, rely=0.783, relwidth=0.02, relheight=0.085)
 
         #creates new window to hold buttons
