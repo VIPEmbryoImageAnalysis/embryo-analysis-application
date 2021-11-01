@@ -1011,7 +1011,7 @@ def openNewWindow():
         label = tk.Label(frame2, text="Size Ranking")
         label.pack(expand=YES)
         #style='secondary.Treeview'
-        tree1 = ttk.Treeview(frame2, columns=("Video", "Rank", "Final Size (um^2)"))
+        tree1 = ttk.Treeview(frame2, style='info.Treeview', columns=("Video", "Rank", "Final Size (um^2)"))
         tree1.pack(expand=YES, fill=BOTH)
         tree1["columns"] = ("1", "2", "3")
         tree1['show'] = 'headings'
@@ -1037,7 +1037,7 @@ def openNewWindow():
         label = tk.Label(frame3, text="Average Growth Rate Ranking")
         label.pack(expand=YES)
         #style='secondary.Treeview'
-        tree2 = ttk.Treeview(frame3, columns=("Video", "Rank", "Average Growth Rate (um^2/h)"))
+        tree2 = ttk.Treeview(frame3, style='info.Treeview', columns=("Video", "Rank", "Average Growth Rate (um^2/h)"))
         tree2.pack(expand=YES, fill=BOTH)
         tree2["columns"] = ("1", "2", "3")
         tree2['show'] = 'headings'
@@ -1063,7 +1063,7 @@ def openNewWindow():
         label = tk.Label(frame4, text="Current Video")
         label.pack(expand=YES)
         #style='secondary.Treeview'
-        tree3 = ttk.Treeview(frame4, columns=("Video", "Final Size (um^2)", "Average Growth Rate (um^2/h)"))
+        tree3 = ttk.Treeview(frame4, style='info.Treeview', columns=("Video", "Final Size (um^2)", "Average Growth Rate (um^2/h)"))
         tree3.pack(expand=YES, fill=BOTH)
         tree3["columns"] = ("1", "2", "3")
         tree3['show'] = 'headings'
@@ -1083,12 +1083,12 @@ def openNewWindow():
 
         #Button to go to the last value
         #style='Outline.TButton'
-        LeftButton = tk.Button(newWindow, text = '<', font = ("Helvetica", 12), command=lambda:BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2))
+        LeftButton = ttk.Button(newWindow, text = '<', style='info.TButton', command=lambda:BackVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2))
         LeftButton.place(relx=0.13, rely=0.783, relwidth=0.02, relheight=0.085)
 
         #Button to go to the next value
         #style='Outline.TButton'
-        RightButton = tk.Button(newWindow, text = '>', font = ("Helvetica", 12), command=lambda:NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2))
+        RightButton = ttk.Button(newWindow, text = '>', style='info.TButton', command=lambda:NextVideo(CurrentTotalVideoAmount, CurrentVideoData, df, df3, newWindow, frame, tempPixelArray2))
         RightButton.place(relx=0.525, rely=0.783, relwidth=0.02, relheight=0.085)
 
         #creates new window to hold buttons
@@ -1097,16 +1097,16 @@ def openNewWindow():
 
         #creates buttons for next steps
         #style='Outline.TButton'
-        yesRemoveButton1 = tk.Button(frame5, text = 'Save Images and Labels', command = lambda: savePics(org_folders, org3_folders, filelist))
+        yesRemoveButton1 = ttk.Button(frame5, text = 'Save Images and Labels', style='info.TButton', command = lambda: savePics(org_folders, org3_folders, filelist))
         yesRemoveButton1.place(relx=0.075, rely=0.1, relwidth=0.40, relheight=0.30)
         #style='Outline.TButton'
-        yesRemoveButton2 = tk.Button(frame5, text = 'Save Results', command = lambda: saveResults(df, df3, filelist, tempPixelArray2))
+        yesRemoveButton2 = ttk.Button(frame5, text = 'Save Results', style='info.TButton', command = lambda: saveResults(df, df3, filelist, tempPixelArray2))
         yesRemoveButton2.place(relx=0.525, rely=0.1, relwidth=0.40, relheight=0.30)
         #style='Outline.TButton'
-        yesRemoveButton3 = tk.Button(frame5, text = 'Load new videos', command = lambda: [newWindow.destroy(), RemoveAllVideos(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
+        yesRemoveButton3 = ttk.Button(frame5, text = 'Load new videos', style='info.TButton', command = lambda: [newWindow.destroy(), RemoveAllVideos(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
         yesRemoveButton3.place(relx=0.075, rely=0.6, relwidth=0.40, relheight=0.30)
         #style='Outline.TButton'
-        yesRemoveButton4 = tk.Button(frame5, text = 'Close App', command = lambda: [newWindow.destroy(), root.destroy(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
+        yesRemoveButton4 = ttk.Button(frame5, text = 'Close App', style='info.TButton', command = lambda: [newWindow.destroy(), root.destroy(), removeTemporaryDirs(org_folders, org2_folders, org3_folders, csvfile2)])
         yesRemoveButton4.place(relx=0.525, rely=0.6, relwidth=0.40, relheight=0.30)
 
         def on_closing():
