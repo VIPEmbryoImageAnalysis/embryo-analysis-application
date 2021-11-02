@@ -589,8 +589,8 @@ def openNewWindow():
 
                 #path to tesseract.exe to get program to work
                 #change to personal path
-                #pytesseract_exe = os.path.join(base_path1, 'Tesseract-OCR/tesseract.exe')
-                pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+                pytesseract_exe = os.path.join(base_path1, 'Tesseract-OCR/tesseract.exe')
+                pytesseract.pytesseract.tesseract_cmd = pytesseract_exe
 
                 # use tesseracts' OCRfunction
                 text = pytesseract.image_to_string(currentTime, lang='eng', config ='-c tessedit_char_whitelist=0123456789h')
